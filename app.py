@@ -1,97 +1,108 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 
-# Page setup with background styling
-st.set_page_config(page_title="Smart Parking", layout="centered")
+# Page setup
+st.set_page_config(page_title="Bengaluru Smart Parking", layout="wide")
 
-page_bg_img = '''
+# Styling
+st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] {
     background-image: url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1350&q=80");
     background-size: cover;
-    background-position: center;
-}
-.block-container {
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 2rem;
-    border-radius: 10px;
 }
 h1, h2, h3, label, .stTextInput>div>div>input, .stSelectbox>div>div>div>div {
     color: white !important;
 }
 </style>
-'''
-st.markdown(page_bg_img, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align:center; color:white;'>🚗 Smart Parking Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:center; color:white;'>🚗 Bengaluru Smart Parking System</h1>", unsafe_allow_html=True)
 
-# State management
+# Session State
 if "booked_slots" not in st.session_state:
     st.session_state.booked_slots = {}
 if "selected_slot" not in st.session_state:
     st.session_state.selected_slot = None
-if "selected_location" not in st.session_state:
-    st.session_state.selected_location = None
+if "location" not in st.session_state:
+    st.session_state.location = None
 
-# Locations
-locations = {
-    "Koramangala": {"booked": 20, "vacant": 5},
-    "Whitefield": {"booked": 18, "vacant": 7},
-    "Indiranagar": {"booked": 15, "vacant": 10},
-    "Jayanagar": {"booked": 25, "vacant": 2},
-    "Malleshwaram": {"booked": 10, "vacant": 15},
+# Area Data
+areas = {
+    "Koramangala": {
+        "booked": 5, "vacant": 10,
+        "updates": "Heavy traffic expected during weekends due to flea markets.",
+        "sub_places": ["Sony World", "Forum Mall", "St. John's Hospital"]
+    },
+    "Whitefield": {
+        "booked": 8, "vacant": 12,
+        "updates": "Metro construction near ITPL might cause delays.",
+        "sub_places": ["ITPL", "Phoenix Mall", "Hope Farm"]
+    },
+    "Indiranagar": {
+        "booked": 6, "vacant": 9,
+        "updates": "Night parking is now chargeable after 10 PM.",
+        "sub_places": ["100ft Road", "Toit", "CMH Road"]
+    },
+    "Jayanagar": {
+        "booked": 3, "vacant": 7,
+        "updates": "Open air parking now available near 4th block.",
+        "sub_places": ["Jayanagar 4th Block", "South End Circle", "RV Road"]
+    },
+    "Malleshwaram": {
+        "booked": 2, "vacant": 6,
+        "updates": "Street parking upgraded to smart meters.",
+        "sub_places": ["Mantri Mall", "Sankey Tank", "8th Cross"]
+    }
 }
 
-# Location Selection
-location = st.selectbox("📍 Select a Bengaluru Location", ["Select"] + list(locations.keys()))
+# Location selection
+location = st.selectbox("📍 Choose a Bengaluru Location", ["Select"] + list(areas.keys()))
 if location != "Select":
-    st.session_state.selected_location = location
-    loc_data = locations[location]
-    total_slots = loc_data["booked"] + loc_data["vacant"]
-    st.markdown(f"<h3 style='color:white;'>🔒 Booked: {loc_data['booked']} | 🟢 Vacant: {loc_data['vacant']}</h3>", unsafe_allow_html=True)
+    st.session_state.location = location
+    area = areas[location]
+    total_slots = area["booked"] + area["vacant"]
 
-    # Slot Display
-    st.markdown("### 🅿️ Available Parking Slots")
+    st.markdown(f"### 🔐 Booked: {area['booked']} | 🟢 Vacant: {area['vacant']} | 🅿️ Total: {total_slots}")
+    st.info(f"📢 **Live Update:** {area['updates']}")
+    st.success(f"📌 **Popular Spots:** {', '.join(area['sub_places'])}")
+
+    # Show slots as buttons
+    st.markdown("### 🚘 Parking Slots")
     cols = st.columns(5)
     for i in range(total_slots):
         key = f"{location}-{i}"
-        is_booked = i < loc_data["booked"] or st.session_state.booked_slots.get(key)
-        slot_color = "#ff4d4f" if is_booked else "#52c41a"
+        is_booked = i < area["booked"] or st.session_state.booked_slots.get(key, False)
+        color = "red" if is_booked else "green"
+        label = f"Slot {i+1}"
+
+        def make_callback(index=i):
+            st.session_state.selected_slot = index
+
         with cols[i % 5]:
-            st.markdown(
-                f"<button style='width:100%; background-color:{slot_color}; color:white; border:none; padding:8px; border-radius:5px;' {'disabled' if is_booked else ''} onclick='window.location.search=\"?slot={i}\"'>Slot {i+1}</button>",
-                unsafe_allow_html=True
-            )
+            if not is_booked:
+                if st.button(f"🟢 {label}", key=key):
+                    st.session_state.selected_slot = i
+            else:
+                st.markdown(f"<div style='background-color:{color}; color:white; padding:10px; text-align:center; border-radius:5px;'>{label} (Booked)</div>", unsafe_allow_html=True)
 
-    # Extract selected slot from query params
-    selected_slot = st.experimental_get_query_params().get("slot", [None])[0]
-    if selected_slot is not None:
-        selected_slot = int(selected_slot)
-        st.session_state.selected_slot = selected_slot
-
-    # Booking Form
+    # Booking form
     if st.session_state.selected_slot is not None:
-        st.markdown(f"### 📝 Booking Slot {st.session_state.selected_slot + 1}")
-        with st.form("booking_form"):
-            car_model = st.text_input("Car Model")
-            car_number = st.text_input("Car Number")
-            hours = st.selectbox("Select Hours", [str(i+1) for i in range(12)])
-            submitted = st.form_submit_button("✅ Confirm Booking")
+        idx = st.session_state.selected_slot
+        key = f"{location}-{idx}"
 
-            if submitted:
-                if car_model and car_number:
-                    book_key = f"{location}-{st.session_state.selected_slot}"
-                    st.session_state.booked_slots[book_key] = True
-                    st.success(f"🎉 Slot {st.session_state.selected_slot + 1} booked at {location} for {hours} hour(s)")
+        st.markdown(f"### 📝 Booking Slot {idx + 1} at {location}")
+        with st.form("booking_form"):
+            model = st.text_input("Vehicle Model")
+            number = st.text_input("Vehicle Number")
+            hours = st.selectbox("How many hours?", [str(i+1) for i in range(12)])
+            confirm = st.form_submit_button("💳 Pay & Confirm")
+
+            if confirm:
+                if model and number:
+                    st.session_state.booked_slots[key] = True
+                    st.success(f"✅ Slot {idx + 1} booked for {hours} hour(s) 🚘 ({model} - {number})")
+                    st.balloons()
                     st.session_state.selected_slot = None
                 else:
-                    st.warning("Please fill in all fields to book a slot.")
+                    st.warning("❗ Please fill in all fields to book.")
 
-# Pie Chart
-st.markdown("### 📊 Booking Insights")
-labels = ['Booked', 'Available']
-sizes = [650, 350]
-colors = ['#ff4d4f', '#52c41a']
-fig, ax = plt.subplots()
-ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors, textprops={'color':"white"})
-st.pyplot(fig)
