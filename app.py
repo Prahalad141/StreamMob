@@ -10,7 +10,7 @@ st.set_page_config(page_title="Bengaluru Smart Parking", layout="wide")
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] {
-    background-image: url('');
+    background-image: url('https://img.freepik.com/free-vector/taxi-service-mobile-app_23-2148471762.jpg?t=st=1718162509~exp=1718166109~hmac=be6122e9a6e19434566edeb69280de8bfd941172db4e0953f4e0ddaed7c34730&w=2000');
     background-size: cover;
 }
 h1, h2, h3, label, .stTextInput>div>div>input, .stSelectbox>div>div>div>div {
