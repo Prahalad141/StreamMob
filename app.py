@@ -14,7 +14,7 @@ st.markdown("""
     background-size: cover;
 }
 h1, h2, h3, label, .stTextInput>div>div>input, .stSelectbox>div>div>div>div {
-    color: white !important;
+    color: black !important;
 }
 </style>
 """, unsafe_allow_html=True)
