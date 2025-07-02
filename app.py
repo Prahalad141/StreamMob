@@ -10,7 +10,7 @@ st.set_page_config(page_title="Bengaluru Smart Parking", layout="wide")
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] {
-    background-image: url('https://images.prismic.io/intuzwebsite/aa72ccad-6c03-47d4-add6-8c5344e86761_Banner.png?w=1080&q=75&auto=format');
+    background-image: url('https://www.solulab.com/wp-content/uploads/2023/02/overview-superdrop.webp');
     background-size: cover;
 }
 h1, h2, h3, label, .stTextInput>div>div>input, .stSelectbox>div>div>div>div {
