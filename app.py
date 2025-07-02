@@ -10,7 +10,7 @@ st.set_page_config(page_title="Bengaluru Smart Parking", layout="wide")
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] {
-    background-image: url('https://thumbs.dreamstime.com/b/vector-illustration-autonomous-online-car-sharing-service-controlled-via-smartphone-app-modern-phone-location-mark-215947180.jpg');
+    background-image: url('');
     background-size: cover;
 }
 h1, h2, h3, label, .stTextInput>div>div>input, .stSelectbox>div>div>div>div {
